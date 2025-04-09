@@ -1,17 +1,18 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from dotenv import load_dotenv
 import requests
+import os
+
+load_dotenv()  # Load variables from .env
 
 app = FastAPI()
 
-# Configure Jinja2 template directory
 templates = Jinja2Templates(directory="templates")
 
-# Your Ticketmaster API Key
-TICKETMASTER_API_KEY = "jiAu09QH4Ezgh7rdBNv0kYjTK7RY59OA"
-TICKETMASTER_URL = "https://app.ticketmaster.com/discovery/v2/events.json"
-
+TICKETMASTER_API_KEY = os.getenv("TICKETMASTER_API_KEY")
+TICKETMASTER_URL = os.getenv("TICKETMASTER_URL")
 # Function to fetch events from Ticketmaster API based on the city
 def get_events(city: str = "New York", event_type: str = "music"):
     params = {
