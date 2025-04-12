@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 import requests
 import os
+import random  # already have requests and os
 
 load_dotenv()  # Load variables from .env
 
@@ -33,3 +34,12 @@ async def home(request: Request, city: str = "New York", event_type: str = "musi
     events = get_events(city, event_type)
     return templates.TemplateResponse("index.html", {"request": request, "city": city, "event_type": event_type, "events": events})
 
+# Random Event Route
+@app.get("/random", response_class=HTMLResponse)
+async def random_concert(request: Request):
+    events = get_events()  # get default list from New York / music
+    if not events:
+        return templates.TemplateResponse("random.html", {"request": request, "event": None})
+    
+    event = random.choice(events)
+    return templates.TemplateResponse("random.html", {"request": request, "event": event})
