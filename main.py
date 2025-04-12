@@ -1,12 +1,12 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from dotenv import load_dotenv
 import requests
 import os
-import random  # already have requests and os
+import random
 
-load_dotenv()  # Load variables from .env
+load_dotenv()
 
 app = FastAPI()
 
@@ -14,30 +14,41 @@ templates = Jinja2Templates(directory="templates")
 
 TICKETMASTER_API_KEY = os.getenv("TICKETMASTER_API_KEY")
 TICKETMASTER_URL = os.getenv("TICKETMASTER_URL")
-# Function to fetch events from Ticketmaster API based on the city
+
 def get_events(city: str = "New York", event_type: str = "music"):
     params = {
         "apikey": TICKETMASTER_API_KEY,
         "city": city,
-        "classificationName": event_type,  # You can also filter by event type like "music"
-        "size": 10  # Number of events to fetch
+        "classificationName": event_type,
+        "size": 10
     }
     response = requests.get(TICKETMASTER_URL, params=params)
     data = response.json()
-
-    # Extract events if available
+    print(f"[Ticketmaster] URL: {response.url}")
+    print(f"[Ticketmaster] Status Code: {response.status_code}")
+    print(f"[Ticketmaster] Snippet: {response.text[:300]}")
     return data.get("_embedded", {}).get("events", [])
 
-# FastAPI Route to Render the Home Page with a form to select city and event type
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, city: str = "New York", event_type: str = "music"):
     events = get_events(city, event_type)
-    return templates.TemplateResponse("index.html", {"request": request, "city": city, "event_type": event_type, "events": events})
 
-# Random Event Route
+    cat_url = None
+    if not events:
+        # fallback cat image with text
+        cat_url = "https://cataas.com/cat/says/No%20concerts%20found!"
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "city": city,
+        "event_type": event_type,
+        "events": events,
+        "cat_url": cat_url
+    })
+
 @app.get("/random", response_class=HTMLResponse)
 async def random_concert(request: Request):
-    events = get_events()  # get default list from New York / music
+    events = get_events()
     if not events:
         return templates.TemplateResponse("random.html", {"request": request, "event": None})
     
