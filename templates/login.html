@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mock Login</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="theme-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <span class="theme-label">🌞 / 🌙</span>
+  </div>
+
+  <div class="login-container">
+    <h2 id="form-title"><i class="fas fa-lock"></i> Welcome Back</h2>
+
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="return validateLogin()">
+      <label for="username">Username</label>
+      <input type="text" id="username" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required>
+
+      <button type="submit"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+
+    <!-- Create Account Form -->
+    <form id="createForm" style="display: none;" onsubmit="return createAccount()">
+      <label for="newUsername">New Username</label>
+      <input type="text" id="newUsername" required>
+
+      <label for="newPassword">New Password</label>
+      <input type="password" id="newPassword" required>
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" required>
+
+      <button type="submit"><i class="fas fa-user-plus"></i> Create Account</button>
+    </form>
+
+    <p id="message"></p>
+    <div id="gif-container"></div>
+
+    <p class="switch-link" onclick="toggleForm()">Don't have an account? <span id="toggleText">Create one</span></p>
+    <button class="reset-btn" onclick="localStorage.clear(); location.reload();">🔁 Reset Accounts</button>
+  </div>
+
+  <script>
+    // Load users from localStorage or default
+    let users = JSON.parse(localStorage.getItem("users")) || {
+      "admin@example.com": "password123",
+      "kevin@cool.com": "lofirocks",
+      "oconnor.cameron4125@gmail.com":"Your8888"
+    };
+
+    const toggle = document.getElementById('darkModeToggle');
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark');
+    });
+
+    function toggleForm() {
+      const loginForm = document.getElementById("loginForm");
+      const createForm = document.getElementById("createForm");
+      const toggleText = document.getElementById("toggleText");
+      const message = document.getElementById("message");
+      const gif = document.getElementById("gif-container");
+      const title = document.getElementById("form-title");
+
+      message.textContent = "";
+      gif.innerHTML = "";
+
+      if (loginForm.style.display === "none") {
+        loginForm.style.display = "block";
+        createForm.style.display = "none";
+        toggleText.textContent = "Create one";
+        title.innerHTML = '<i class="fas fa-lock"></i> Welcome Back';
+      } else {
+        loginForm.style.display = "none";
+        createForm.style.display = "block";
+        toggleText.textContent = "Back to login";
+        title.innerHTML = '<i class="fas fa-user-plus"></i> Create Your Account';
+      }
+    }
+
+    function validateLogin() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const message = document.getElementById("message");
+      const gif = document.getElementById("gif-container");
+
+      gif.innerHTML = "";
+
+      if (users[user] && users[user] === pass) {
+        message.textContent = "✅ Login successful! Redirecting...";
+        message.style.color = "#28a745";
+        setTimeout(() => {
+          window.location.href = "http://127.0.0.1:8000"; // 🔁 redirect after 1.5s
+        }, 1500);
+      } else {
+        message.textContent = "❌ Invalid credentials.";
+        message.style.color = "#dc3545";
+        gif.innerHTML = '<img src="https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif" alt="fail gif">';
+      }
+      return false;
+    }
+
+    function createAccount() {
+      const user = document.getElementById("newUsername").value;
+      const pass = document.getElementById("newPassword").value;
+      const confirm = document.getElementById("confirmPassword").value;
+      const message = document.getElementById("message");
+      const gif = document.getElementById("gif-container");
+
+      gif.innerHTML = "";
+
+      if (users[user]) {
+        message.textContent = "❌ That email is already registered.";
+        message.style.color = "#dc3545";
+        return false;
+      }
+
+      if (pass !== confirm) {
+        message.textContent = "❌ Passwords do not match.";
+        message.style.color = "#dc3545";
+        gif.innerHTML = '<img src="https://media.giphy.com/media/YTbZzCkRQCEJa/giphy.gif" alt="fail gif">';
+      } else {
+        users[user] = pass;
+        localStorage.setItem("users", JSON.stringify(users));
+        message.textContent = "🎉 Account created! Now go login.";
+        message.style.color = "#28a745";
+        toggleForm();
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>
