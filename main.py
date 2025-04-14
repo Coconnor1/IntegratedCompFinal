@@ -46,7 +46,7 @@ async def home(request: Request, city: str = None, event_type: str = "music"):
 
     cat_url = None
     if not events:
-        cat_url = "https://cataas.com/cat/says/No%20concerts%20found!"
+        cat_url = "https://cataas.com/cat/says/No%20events%20found!"
 
     return templates.TemplateResponse("index.html", {
         "request": request,
